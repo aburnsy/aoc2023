@@ -13,3 +13,9 @@ def test_sample_input_given_part2():
     race = get_source_data_part2("tests\\aoc6\\sample.txt")
     winning_ways = get_ways_to_win(race)
     assert winning_ways == 71503
+
+
+def test_sample_input_given_part2_eqn():
+    race = get_source_data_part2("tests\\aoc6\\sample.txt")
+    winning_ways = get_ways_to_win_eqn(race)
+    assert winning_ways == 71503
