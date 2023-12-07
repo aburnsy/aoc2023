@@ -21,5 +21,22 @@ def practice_groupby():
     print(frequencies)
 
 
+def practice_counters():
+    """Day 7 Counter objects
+    Even better than group by is Counter tools
+    A Counter is a dict subclass for counting hashable objects. It is a collection where elements are stored as dictionary keys and their counts are stored as dictionary values.
+    """
+    from collections import Counter
+
+    cnt = Counter()
+    for word in ["red", "blue", "red", "green", "blue", "blue"]:
+        cnt[word] += 1
+    print(cnt)
+    cards = list("K2K52JJ")
+    frequencies = [freq for card, freq in Counter(cards).most_common() if card != "J"]
+    print(frequencies)
+
+
 if __name__ == "__main__":
+    practice_counters()
     practice_groupby()
