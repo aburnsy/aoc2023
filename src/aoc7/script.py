@@ -1,3 +1,5 @@
+from itertools import groupby
+
 card_order = ["A", "K", "Q", "J", "T", "9", "8", "7", "6", "5", "4", "3", "2"]
 card_order.reverse()
 
@@ -23,14 +25,10 @@ def get_card_frequencies(cards: list) -> list:
     Return a list of frequencies of each card in the hand.
     The list should be ordered from most frequent to least frequent.
     """
-    card_groups = []
-    counted = set()
-    for card in cards:
-        if card not in counted:
-            c = cards.count(card)
-            card_groups.append(c)
-            counted.add(card)
-    return sorted(card_groups, reverse=True)
+    return sorted(
+        [len(list(g)) for card, g in groupby(sorted(cards))],
+        reverse=True,
+    )
 
 
 def get_card_frequencies_jokers(cards: list) -> list:
@@ -40,22 +38,16 @@ def get_card_frequencies_jokers(cards: list) -> list:
     Jokers are wild here, so we should add them to the most frequently encountered card's frequency value.
     If we only get jokers, return 5.
     """
-    card_groups = []
-    counted = set()
-    js = 0
-    for card in cards:
-        if card not in counted and card != "J":
-            c = cards.count(card)
-            card_groups.append(c)
-            counted.add(card)
-        if card == "J":
-            js += 1
+    card_frequencies = sorted(
+        [len(list(g)) for card, g in groupby(sorted(cards)) if card != "J"],
+        reverse=True,
+    )
+    js = cards.count("J")
     if js == 5:  # edge case - are there any others???
         return [5]
-    ranked_card_groups = sorted(card_groups, reverse=True)
     # best place to add the J will always be the largest group of cards
-    ranked_card_groups[0] += js
-    return ranked_card_groups
+    card_frequencies[0] += js
+    return card_frequencies
 
 
 def score_hand(cards: list, jokers_wild: bool) -> list:
@@ -72,29 +64,32 @@ def score_hand(cards: list, jokers_wild: bool) -> list:
         2 = 0
     When Js are wild, J scores the lowest.
     """
-    if jokers_wild:
-        hand_scores = get_card_frequencies_jokers(cards)
-    else:
-        hand_scores = get_card_frequencies(cards)
 
-    if hand_scores[0] == 5:
-        score = [6]
-    elif hand_scores[0] == 4:
-        score = [5]
-    elif hand_scores[0] == 3 and hand_scores[1] == 2:
-        score = [4]
-    elif hand_scores[0] == 3:
-        score = [3]
-    elif hand_scores[0] == 2 and hand_scores[1] == 2:
-        score = [2]
-    elif hand_scores[0] == 2:
-        score = [1]
-    else:
-        score = [0]  # weakest hand first
-    if jokers_wild:
-        score.extend([card_order_js.index(card) for card in cards])
-    else:
-        score.extend([card_order.index(card) for card in cards])
+    hand_scores = (
+        get_card_frequencies_jokers(cards)
+        if jokers_wild
+        else get_card_frequencies(cards)
+    )
+
+    score_map = [
+        [1, 1, 1, 1, 1],
+        [2, 1, 1, 1],
+        [2, 2, 1],
+        [3, 1, 1],
+        [3, 2],
+        [4, 1],
+        [5],
+    ]
+
+    # The overall score is the hand score followed by each individual card score
+    score = [
+        score_map.index(hand_scores),
+        *[
+            card_order_js.index(card) if jokers_wild else card_order.index(card)
+            for card in cards
+        ],
+    ]
+
     return score
 
 
