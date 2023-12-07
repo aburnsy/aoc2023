@@ -58,7 +58,7 @@ def get_card_frequencies_jokers(cards: list) -> list:
     return ranked_card_groups
 
 
-def score_hand(hand: str, jokers_wild: bool = False) -> list:
+def score_hand(cards: list, jokers_wild: bool) -> list:
     """Return a list of scores, which can then be ordered later to compare hands.
     The first entry in the list should be the type of hand:
         5 of a kind = 5
@@ -72,7 +72,6 @@ def score_hand(hand: str, jokers_wild: bool = False) -> list:
         2 = 0
     When Js are wild, J scores the lowest.
     """
-    cards = [*hand]
     if jokers_wild:
         hand_scores = get_card_frequencies_jokers(cards)
     else:
@@ -99,15 +98,16 @@ def score_hand(hand: str, jokers_wild: bool = False) -> list:
     return score
 
 
+def get_winnings(hands: list, jokers_wild: bool = False):
+    ordered_hands = sorted(hands, key=lambda hand: score_hand([*hand[0]], jokers_wild))
+    return sum([j[1] * (i + 1) for i, j in enumerate(ordered_hands)])
+
+
 if __name__ == "__main__":
     hands = import_cards("src\\aoc7\\input.txt")
-    ordered_hands = sorted(hands, key=lambda hand: score_hand(hand[0]))
-    total_winnings = sum([j[1] * (i + 1) for i, j in enumerate(ordered_hands)])
+    total_winnings = get_winnings(hands)
     print(f"Total Winnings: {total_winnings}")
 
     hands = import_cards("src\\aoc7\\input.txt")
-    ordered_hands = sorted(
-        hands, key=lambda hand: score_hand(hand[0], jokers_wild=True)
-    )
-    total_winnings = sum([j[1] * (i + 1) for i, j in enumerate(ordered_hands)])
+    total_winnings = get_winnings(hands, jokers_wild=True)
     print(f"Total Winnings: {total_winnings}")
