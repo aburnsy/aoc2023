@@ -5,22 +5,20 @@ card_order_js = ["A", "K", "Q", "T", "9", "8", "7", "6", "5", "4", "3", "2", "J"
 card_order_js.reverse()
 
 
-def import_cards(file: str, jokers_wild: bool = False) -> list:
-    """Import the cards"""
+def import_cards(file: str) -> list:
+    """Import the hands and convert each bid to an integer."""
     with open(file, "r") as input_file:
         hands_tmp = [line.strip() for line in input_file.readlines()]
-        hands = [
+        return [
             [
                 hand.split()[0],
                 int(hand.split()[1]),
-                score_hand(hand.split()[0], jokers_wild),
             ]
             for hand in hands_tmp
         ]
-        return hands
 
 
-def get_card_groups(cards: list) -> list:
+def get_card_frequencies(cards: list) -> list:
     """
     Return a list of frequencies of each card in the hand.
     The list should be ordered from most frequent to least frequent.
@@ -35,7 +33,7 @@ def get_card_groups(cards: list) -> list:
     return sorted(card_groups, reverse=True)
 
 
-def get_card_groups_jokers(cards: list) -> list:
+def get_card_frequencies_jokers(cards: list) -> list:
     """
     Return a list of frequencies of each card in the hand.
     The list should be ordered from most frequent to least frequent.
@@ -60,7 +58,7 @@ def get_card_groups_jokers(cards: list) -> list:
     return ranked_card_groups
 
 
-def score_hand(hand: str, jokers_wild: bool) -> list:
+def score_hand(hand: str, jokers_wild: bool = False) -> list:
     """Return a list of scores, which can then be ordered later to compare hands.
     The first entry in the list should be the type of hand:
         5 of a kind = 5
@@ -76,9 +74,10 @@ def score_hand(hand: str, jokers_wild: bool) -> list:
     """
     cards = [*hand]
     if jokers_wild:
-        hand_scores = get_card_groups_jokers(cards)
+        hand_scores = get_card_frequencies_jokers(cards)
     else:
-        hand_scores = get_card_groups(cards)
+        hand_scores = get_card_frequencies(cards)
+
     if hand_scores[0] == 5:
         score = [6]
     elif hand_scores[0] == 4:
@@ -102,11 +101,13 @@ def score_hand(hand: str, jokers_wild: bool) -> list:
 
 if __name__ == "__main__":
     hands = import_cards("src\\aoc7\\input.txt")
-    ordered_hands = sorted(hands, key=lambda x: x[2])
+    ordered_hands = sorted(hands, key=lambda hand: score_hand(hand[0]))
     total_winnings = sum([j[1] * (i + 1) for i, j in enumerate(ordered_hands)])
     print(f"Total Winnings: {total_winnings}")
 
-    hands = import_cards("src\\aoc7\\input.txt", jokers_wild=True)
-    ordered_hands = sorted(hands, key=lambda x: x[2])
+    hands = import_cards("src\\aoc7\\input.txt")
+    ordered_hands = sorted(
+        hands, key=lambda hand: score_hand(hand[0], jokers_wild=True)
+    )
     total_winnings = sum([j[1] * (i + 1) for i, j in enumerate(ordered_hands)])
     print(f"Total Winnings: {total_winnings}")
